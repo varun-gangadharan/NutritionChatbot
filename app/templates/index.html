@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NutriGenie</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 70%;
+            max-width: 400px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        #conversation {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: left;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .message {
+            padding: 10px 20px;
+            border-radius: 18px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+            box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13);
+            margin-left: 10px; /* Space between messages */
+            margin-right: 10px; /* Space between messages */
+            max-width: 60%; /* Adjust width of message bubbles */
+        }
+
+        .user-message {
+            background-color: #dcf8c6;
+            align-self: flex-end;
+            text-align: right;
+        }
+
+        .bot-message {
+            background-color: #ebebeb;
+            align-self: flex-start;
+            text-align: left;
+        }
+
+        #conversation {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* Align messages to the start of the flex container */
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* Use this class to align the user messages to the right */
+        .right {
+            align-self: flex-end;
+        }
+
+
+        /* After adding a message, clear the float */
+        .message:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background-color: black;
+            margin-left: 2px;
+            animation: blink 0.7s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NutriGenie</h1>
+        <input type="text" id="user_input" placeholder="Ask me anything about nutrition..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()">Ask</button>
+
+        <div id="conversation"></div> <!-- New conversation container -->
+    </div>
+
+    <script>
+        let typingInterval;
+        let typingSpeed = 20; // Initial typing speed in milliseconds
+
+        function handleKeyPress(event) {
+            if (event.keyCode === 13) { // 13 is the Enter key
+                sendMessage();
+            }
+        }
+    
+        function appendMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = content;
+            messageDiv.classList.add('message');
+            if (isUser) {
+                messageDiv.classList.add('user-message', 'right');
+            } else {
+                messageDiv.classList.add('bot-message');
+            }
+            document.getElementById('conversation').appendChild(messageDiv);
+            messageDiv.scrollIntoView({ behavior: 'smooth' }); // Scroll to new message
+        }
+    
+        function typeResponse(text) {
+            // Remove cursor from any previous messages
+            const existingCursors = document.querySelectorAll('.cursor');
+            existingCursors.forEach(cursor => cursor.remove());
+    
+            const responseDiv = document.createElement('div');
+            responseDiv.classList.add('message', 'bot-message');
+            const cursor = document.createElement('span');
+            cursor.className = 'cursor';
+            responseDiv.appendChild(cursor);
+            document.getElementById('conversation').appendChild(responseDiv);
+    
+            let index = 0;
+            clearInterval(typingInterval);
+            typingInterval = setInterval(() => {
+                if (index < text.length) {
+                    const charSpan = document.createElement('span');
+                    charSpan.textContent = text.charAt(index);
+                    responseDiv.insertBefore(charSpan, cursor);
+                    index++;
+                } else {
+                    clearInterval(typingInterval);
+                    // Optionally move the cursor outside the span once typing is done
+                    cursor.style.marginLeft = "5px";
+                }
+            }, typingSpeed);
+        }
+    
+        function sendMessage() {
+            const input = document.getElementById('user_input').value;
+            if (input.trim() !== '') {
+                appendMessage(input, true); // Append user question to conversation
+                fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: input })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    typeResponse(data.response); // Call the typeResponse function to display chatbot's answer
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+    </script>
+    
+</body>
+</html>
