@@ -180,23 +180,27 @@
         }
     
         function sendMessage() {
-            const input = document.getElementById('user_input').value;
-            if (input.trim() !== '') {
-                appendMessage(input, true); // Append user question to conversation
+            const input = document.getElementById('user_input');
+            const inputValue = input.value; // Get the value from the input box
+            if (inputValue.trim() !== '') {
+                appendMessage(inputValue, true); // Append user question to conversation
                 fetch('/ask', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: input })
+                    body: JSON.stringify({ message: inputValue })
                 })
                 .then(response => response.json())
                 .then(data => {
                     typeResponse(data.response); // Call the typeResponse function to display chatbot's answer
                 })
                 .catch(error => console.error('Error:', error));
+                
+                input.value = ''; // Clear the input box after the message has been sent
             }
         }
+
     </script>
     
 </body>
