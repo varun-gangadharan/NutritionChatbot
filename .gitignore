@@ -1,1 +1,2 @@
-.env
+.env.ipynb_checkpoints/
+banned_secrets.txt
