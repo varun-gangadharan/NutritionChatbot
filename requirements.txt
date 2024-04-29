@@ -1,0 +1,4 @@
+#to install some dependenceis run "pip install -r requirements.txt"
+Flask
+openai
+python-dotenv
