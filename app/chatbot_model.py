@@ -2,7 +2,6 @@
 import os
 import openai
 import sys
-sys.path.append('C:/Users/andre/Documents/Nutrition Chatbot/NutritionChatbot/app')
 from llama_index.experimental.query_engine import PandasQueryEngine
 from llama_index.core import StorageContext, VectorStoreIndex, load_index_from_storage
 from llama_index.readers.file import PDFReader
@@ -21,10 +20,9 @@ load_dotenv()
 food_path = os.path.join("data", "food.csv")
 food_df = pd.read_csv(food_path)
 
-OPENAI_API_KEY = "sk-proj-wzD5Px1f6Pr6z7oeBslrT3BlbkFJolU2pIvuoigJtHmRTcEE"
+OPENAI_API_KEY = ""
 
 openai.api_key = OPENAI_API_KEY
-#os.environ["sk-proj-wzD5Px1f6Pr6z7oeBslrT3BlbkFJolU2pIvuoigJtHmRTcEE"]
 
 population_query_engine = PandasQueryEngine(
     df=food_df, verbose=True, instruction_str=instruction_str
